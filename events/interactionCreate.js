@@ -178,11 +178,11 @@ module.exports = {
                     if (member.roles.cache.has(roleId)) {
                         await member.roles.remove(role).catch(() => {});
                         await member.roles.remove(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `✅ **${role.name}** ve **Bildirim** rolleri üzerinizden alındı!` });
+                        return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı.` });
                     } else {
                         await member.roles.add(role).catch(() => {});
                         await member.roles.add(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `🎉 **${role.name}** ve **Bildirim** rolleri başarıyla verildi!` });
+                        return interaction.editReply({ content: `🎉 **${role.name}** rolü başarıyla verildi!` });
                     }
                 }
 
