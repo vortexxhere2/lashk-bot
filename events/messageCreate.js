@@ -27,6 +27,11 @@ module.exports = {
         // Botların kendi mesajlarına veya diğer botlara yanıt vermesini engelle
         if (message.author.bot || !message.guild) return;
 
+        // @everyone veya @here atıldığında bot hiç tepki vermesin
+        if (message.content.includes('@everyone') || message.content.includes('@here')) {
+            return;
+        }
+
         // --- LEVEL SİSTEMİ & XP KODU ---
         const userId = message.author.id;
         const guildId = message.guild.id;
@@ -126,6 +131,11 @@ module.exports = {
             .replace(/ç/g, 'c')
             .trim();
 
+        // "as" veya "a.s." yazıldığında doğrudan pas geç (yanıt verme)
+        if (content === 'as' || content === 'a.s.' || content === 'a.s') {
+            return;
+        }
+
         // 1. MERHABA
         const merhabaRegex = /^(mrhb|mrb|mrh|meraba|merhaba|merhabalaar|merhabalar|merheba)$/i;
         if (merhabaRegex.test(content)) {
@@ -139,7 +149,7 @@ module.exports = {
         }
 
         // 3. SELAMÜN ALEYKÜM
-        const saRegex = /^(sa|s\.a\.|a\.s\.|selamunaleykum|selamun aleykum|selaminaleykum|selamin aleykum|selamun aleykuum|sa cumleten|sa hoke)$/i;
+        const saRegex = /^(sa|s\.a\.|selamunaleykum|selamun aleykum|selaminaleykum|selamin aleykum|selamun aleykuum|sa cumleten|sa hoke)$/i;
         if (saRegex.test(content)) {
             return message.reply(`Aleykümselam, Hoşgeldin <@${message.author.id}>`);
         }
