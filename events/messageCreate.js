@@ -1,8 +1,8 @@
 const Level = require('../models/Level');
-const { GoogleGenAI } = require('@google/genai');
+const { Groq } = require('groq-sdk');
 
-// Gemini istemcisini .env içerisindeki anahtar ile başlatıyoruz
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Groq istemcisini .env içerisindeki anahtar ile başlatıyoruz
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Belirttiğin Seviye Rol Haritası
 const levelRoles = {
@@ -75,7 +75,7 @@ module.exports = {
             }
         }
 
-        // --- GEMINI YAPAY ZEKA ETİKET YANITI ---
+        // --- GROQ YAPAY ZEKA ETİKET YANITI ---
         if (message.mentions.has(message.client.user)) {
             const cleanContent = message.content
                 .replace(`<@!${message.client.user.id}>`, '')
@@ -91,16 +91,16 @@ module.exports = {
 
                 const systemInstruction = "Sen LASHK klanının Discord botusun. Adın LASHK Bot. Discord, oyunlar ve klan kültürü hakkında bilgilisin. Samimi, yardımsever, bazen oyuncu dilinden anlayan bir tarzda Türkçe yanıtlar ver.";
 
-                const response = await ai.models.generateContent({
-                    model: 'gemini-3.8-flash',
-                    contents: cleanContent,
-                    config: {
-                        systemInstruction: systemInstruction,
-                        maxOutputTokens: 500,
-                    }
+                const completion = await groq.chat.completions.create({
+                    messages: [
+                        { role: "system", content: systemInstruction },
+                        { role: "user", content: cleanContent }
+                    ],
+                    model: "llama-3.3-70b-versatile",
+                    max_tokens: 500,
                 });
 
-                const replyText = response.text || "Şu anda yanıt üretemiyorum, lütfen tekrar dene.";
+                const replyText = completion.choices[0]?.message?.content || "Şu anda yanıt üretemiyorum, lütfen tekrar dene.";
 
                 if (replyText.length > 2000) {
                     return message.reply(replyText.substring(0, 1997) + '...');
@@ -109,7 +109,7 @@ module.exports = {
                 return message.reply(replyText);
 
             } catch (error) {
-                console.error('Gemini API Hatası:', error);
+                console.error('Groq API Hatası:', error);
                 return message.reply('Yapay zeka beynimde bir hata oluştu, şu an yanıt veremiyorum 😔');
             }
         }
