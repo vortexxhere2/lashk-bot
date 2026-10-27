@@ -96,7 +96,7 @@ module.exports = {
                         { role: "system", content: systemInstruction },
                         { role: "user", content: cleanContent }
                     ],
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama3-8b-8192",
                     max_tokens: 500,
                 });
 
