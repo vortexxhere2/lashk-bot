@@ -175,14 +175,37 @@ module.exports = {
                         return interaction.editReply({ content: '❌ Ping rolleri veya bonus rol sistemde bulunamadı ya da silinmiş!' });
                     }
 
+                    // Tüm ping rolleri listesi (Kontrol için)
+                    const allPingRoleIds = [
+                        '1556017471302139954',
+                        '1556017494760620032',
+                        '1556018031744913449',
+                        '1556017506030981251',
+                        '1556017786411683851',
+                        '1556017796050198590',
+                        '1556018012778139659',
+                        '1556018022248878170'
+                    ];
+
                     if (member.roles.cache.has(roleId)) {
+                        // Rolü üzerindeyken tıkladıysa -> Rolü kaldır
                         await member.roles.remove(role).catch(() => {});
-                        await member.roles.remove(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı.` });
+
+                        // Kullanıcının başka herhangi bir ping rolü kalıp kalmadığını kontrol et
+                        const hasOtherPingRole = allPingRoleIds.some(id => id !== roleId && member.roles.cache.has(id));
+
+                        // Başka hiç ping rolü kalmadıysa bonus rolü de kaldır, kaldıysa dokunma
+                        if (!hasOtherPingRole) {
+                            await member.roles.remove(bonusRole).catch(() => {});
+                            return interaction.editReply({ content: `✅ **${role.name}** rolü kaldırıldı. Başka ping rolünüz kalmadığı için **Bildirim** rolü de üzerinizden alındı!` });
+                        } else {
+                            return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı! Diğer ping rolleriniz aktif olduğu için Bildirim rolünüz duruyor.` });
+                        }
                     } else {
+                        // Rolü yoksa ekle ve bonus rolü de garanti olsun diye ekle
                         await member.roles.add(role).catch(() => {});
                         await member.roles.add(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `🎉 **${role.name}** rolü başarıyla verildi!` });
+                        return interaction.editReply({ content: `🎉 **${role.name}** ve **Bildirim** rolleri başarıyla eklendi!` });
                     }
                 }
 
