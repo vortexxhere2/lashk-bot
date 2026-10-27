@@ -197,15 +197,15 @@ module.exports = {
                         // Başka hiç ping rolü kalmadıysa bonus rolü de kaldır, kaldıysa dokunma
                         if (!hasOtherPingRole) {
                             await member.roles.remove(bonusRole).catch(() => {});
-                            return interaction.editReply({ content: `✅ **${role.name}** rolü kaldırıldı. Başka ping rolünüz kalmadığı için **Bildirim** rolü de üzerinizden alındı!` });
+                            return interaction.editReply({ content: `⛔ **${role.name}**  rolü üzerinizden alındı.` });
                         } else {
-                            return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı! Diğer ping rolleriniz aktif olduğu için Bildirim rolünüz duruyor.` });
+                            return interaction.editReply({ content: `✅ **${role.name}** rolü başarıyla verildi!` });
                         }
                     } else {
                         // Rolü yoksa ekle ve bonus rolü de garanti olsun diye ekle
                         await member.roles.add(role).catch(() => {});
                         await member.roles.add(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `🎉 **${role.name}** ve **Bildirim** rolleri başarıyla eklendi!` });
+                        return interaction.editReply({ content: `🎉 **${role.name}** rolü başarıyla verildi!` });
                     }
                 }
 
