@@ -21,6 +21,9 @@ const levelRoles = {
 // Spam engellemek için cooldown (60 saniye)
 const cooldowns = new Set();
 
+// Kullanıcıların sohbet geçmişini (hafızasını) tutmak için Map
+const userHistories = new Map();
+
 module.exports = {
     name: 'messageCreate',
     async execute(message) {
@@ -80,7 +83,7 @@ module.exports = {
             }
         }
 
-        // --- GROQ YAPAY ZEKA ETİKET YANITI ---
+        // --- GROQ YAPAY ZEKA ETİKET YANITI (HAFIZALI / GEÇMİŞLİ) ---
         if (message.mentions.has(message.client.user)) {
             const cleanContent = message.content
                 .replace(`<@!${message.client.user.id}>`, '')
@@ -96,16 +99,34 @@ module.exports = {
 
                 const systemInstruction = "Sen LASHK klanının Discord botusun. Adın LASHK Bot. Discord, oyunlar ve klan kültürü hakkında bilgilisin. Samimi, yardımsever, bazen oyuncu dilinden anlayan bir tarzda Türkçe yanıtlar ver.";
 
+                // Kullanıcının daha önceki sohbet geçmişini al, yoksa boş başlat
+                if (!userHistories.has(userId)) {
+                    userHistories.set(userId, []);
+                }
+                const history = userHistories.get(userId);
+
+                // Kullanıcının yeni mesajını hafızaya ekle
+                history.push({ role: "user", content: cleanContent });
+
+                // Hafızanın çok şişmemesi için son 10 mesajı (5 soru-cevap) tut
+                if (history.length > 10) {
+                    history.shift();
+                }
+
+                // Groq API'ye sistem talimatı ve geçmiş mesajların tümünü gönder
                 const completion = await groq.chat.completions.create({
                     messages: [
                         { role: "system", content: systemInstruction },
-                        { role: "user", content: cleanContent }
+                        ...history
                     ],
                     model: "openai/gpt-oss-20b",
                     max_tokens: 500,
                 });
 
                 const replyText = completion.choices[0]?.message?.content || "Şu anda yanıt üretemiyorum, lütfen tekrar dene.";
+
+                // Botun verdiği yanıtı da hafızaya ekle ki bir sonraki mesajda hatarlasın
+                history.push({ role: "assistant", content: replyText });
 
                 if (replyText.length > 2000) {
                     return message.reply(replyText.substring(0, 1997) + '...');
@@ -120,7 +141,6 @@ module.exports = {
         }
 
         // --- MEVCUT MESAJ YANITLARI ---
-        // Mesajı küçük harfe çevirip Türkçe karakterleri ve ekstra boşlukları düzeltelim
         const content = message.content
             .toLowerCase()
             .replace(/ı/g, 'i')
