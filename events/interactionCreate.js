@@ -164,19 +164,25 @@ module.exports = {
                     }
 
                     const roleId = interaction.customId.replace('ping_', '');
+                    const bonusRoleId = '1560192220911632445';
                     const member = interaction.member;
-                    const role = interaction.guild.roles.cache.get(roleId);
+                    const guild = interaction.guild;
 
-                    if (!role) {
-                        return interaction.editReply({ content: '❌ Bu rol sistemde bulunamadı veya silinmiş!' });
+                    const role = guild.roles.cache.get(roleId);
+                    const bonusRole = guild.roles.cache.get(bonusRoleId);
+
+                    if (!role || !bonusRole) {
+                        return interaction.editReply({ content: '❌ Ping rolleri veya bonus rol sistemde bulunamadı ya da silinmiş!' });
                     }
 
                     if (member.roles.cache.has(roleId)) {
                         await member.roles.remove(role).catch(() => {});
-                        return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı!` });
+                        await member.roles.remove(bonusRole).catch(() => {});
+                        return interaction.editReply({ content: `✅ **${role.name}** ve **Bildirim** rolleri üzerinizden alındı!` });
                     } else {
                         await member.roles.add(role).catch(() => {});
-                        return interaction.editReply({ content: `🎉 **${role.name}** rolü başarıyla verildi!` });
+                        await member.roles.add(bonusRole).catch(() => {});
+                        return interaction.editReply({ content: `🎉 **${role.name}** ve **Bildirim** rolleri başarıyla verildi!` });
                     }
                 }
 
