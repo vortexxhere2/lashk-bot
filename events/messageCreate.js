@@ -139,7 +139,7 @@ module.exports = {
         }
 
         // 3. SELAMÜN ALEYKÜM
-        const saRegex = /^(sa|s\.a\.|as|a\.s\.|selamunaleykum|selamun aleykum|selaminaleykum|selamin aleykum|selamun aleykuum|sa cumleten|sa hoke)$/i;
+        const saRegex = /^(sa|s\.a\.|a\.s\.|selamunaleykum|selamun aleykum|selaminaleykum|selamin aleykum|selamun aleykuum|sa cumleten|sa hoke)$/i;
         if (saRegex.test(content)) {
             return message.reply(`Aleykümselam, Hoşgeldin <@${message.author.id}>`);
         }
