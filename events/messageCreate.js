@@ -96,7 +96,7 @@ module.exports = {
                         { role: "system", content: systemInstruction },
                         { role: "user", content: cleanContent }
                     ],
-                    model: "openai/gpt-oss-20b",
+                    model: "llama-3.3-70b-versatile",
                     max_tokens: 500,
                 });
 
