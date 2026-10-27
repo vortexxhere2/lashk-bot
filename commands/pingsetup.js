@@ -50,7 +50,51 @@ module.exports = {
         const targetChannel = interaction.guild.channels.cache.get('1558815903033073685');
 
         if (targetChannel) {
-            await targetChannel.send({ embeds: [embed], components: [row1, row2] });
+            const panelMessage = await targetChannel.send({ embeds: [embed], components: [row1, row2] });
+            
+            // Eğer buton tıklama mantığı bu komut dosyası içinde çalışacaksa kolektör (collector) buraya eklenebilir:
+            const collector = panelMessage.createMessageComponentCollector();
+
+            collector.on('collect', async i => {
+                if (!i.isButton()) return;
+                if (!i.customId.startsWith('ping_')) return;
+
+                const roleId = i.customId.replace('ping_', '');
+                const member = i.member;
+                const guild = i.guild;
+
+                // İstediğin ortak bonus rol ID'si
+                const bonusRoleId = '1560192220911632445';
+
+                const targetRole = guild.roles.cache.get(roleId);
+                const bonusRole = guild.roles.cache.get(bonusRoleId);
+
+                if (!targetRole || !bonusRole) {
+                    return i.reply({ content: '❌ Roller sistemde bulunamadı.', ephemeral: true });
+                }
+
+                try {
+                    await i.deferReply({ ephemeral: true });
+
+                    if (member.roles.cache.has(roleId)) {
+                        await member.roles.remove(targetRole);
+                        await member.roles.remove(bonusRole).catch(() => {});
+                        await i.editReply({ content: `❌ **${targetRole.name}** ve **Bildirim** rolleri üzerinizden alındı.` });
+                    } else {
+                        await member.roles.add(targetRole);
+                        await member.roles.add(bonusRole).catch(() => {});
+                        await i.editReply({ content: `✅ **${targetRole.name}** ve **Bildirim** rolleri başarıyla eklendi!` });
+                    }
+                } catch (error) {
+                    console.error('Rol verme hatası:', error);
+                    if (!i.replied && !i.deferred) {
+                        await i.reply({ content: '❌ Roller güncellenirken bir hata oluştu.', ephemeral: true }).catch(() => {});
+                    } else {
+                        await i.editReply({ content: '❌ Roller güncellenirken bir hata oluştu.' }).catch(() => {});
+                    }
+                }
+            });
+
             return interaction.editReply({ content: '✅ Ping paneli başarıyla <#1558815903033073685> kanalına kuruldu!' });
         } else {
             return interaction.editReply({ content: '❌ Hedef kanal bulunamadı! Lütfen Kanal ID\'sini kontrol edin.' });
