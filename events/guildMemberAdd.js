@@ -5,6 +5,19 @@ const TARGET_MEMBER_COUNT = 100; // Hedeflenen üye sayısı
 module.exports = {
     name: 'guildMemberAdd',
     async execute(member) {
+        // --- 1. OTOROL (MEMBER ROLÜ) VERME İŞLEMİ ---
+        try {
+            const roleId = '1556017439207202896';
+            const role = member.guild.roles.cache.get(roleId);
+
+            if (role) {
+                await member.roles.add(role);
+            }
+        } catch (err) {
+            console.error('Otorol Verilirken Hata Oluştu:', err);
+        }
+
+        // --- 2. MEVCUT HOŞ GELDİN & LOG SİSTEMİ ---
         const WELCOME_CHANNEL_ID = process.env.WELCOME_CHANNEL_ID;
         const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
         if (!channel) return;
