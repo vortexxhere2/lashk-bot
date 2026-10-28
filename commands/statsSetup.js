@@ -15,13 +15,11 @@ module.exports = {
         const { guild } = interaction;
 
         try {
-            // Check if stats are already set up
             let statsData = await ServerStats.findOne({ guildId: guild.id });
             if (statsData) {
                 return interaction.editReply({ content: 'Server statistics channels are already set up.' });
             }
 
-            // Create Stats Category (locked for @everyone)
             const category = await guild.channels.create({
                 name: 'SERVER STATS',
                 type: ChannelType.GuildCategory,
@@ -33,42 +31,38 @@ module.exports = {
                 ],
             });
 
-            // Calculate current counts
-            const totalMembers = guild.memberCount;
-            const botCount = guild.members.cache.filter(m => m.user.bot).size;
+            // Calculate initial counts (excluding bots for members, including total for total)
+            const humanCount = guild.members.cache.filter(m => !m.user.bot).size;
+            const totalCount = guild.memberCount;
+            const voiceCount = guild.guild.members.cache.filter(m => m.voice.channel).size;
 
-            // Create Member Count Channel
             const memberChannel = await guild.channels.create({
-                name: `Members: ${totalMembers}`,
+                name: `Members: ${humanCount}`,
                 type: ChannelType.GuildVoice,
                 parent: category.id,
-                permissionOverwrites: [
-                    {
-                        id: guild.roles.everyone,
-                        deny: [PermissionFlagsBits.Connect],
-                    },
-                ],
+                permissionOverwrites: [{ id: guild.roles.everyone, deny: [PermissionFlagsBits.Connect] }],
             });
 
-            // Create Bot Count Channel
-            const botChannel = await guild.channels.create({
-                name: `Bots: ${botCount}`,
+            const totalChannel = await guild.channels.create({
+                name: `Total: ${totalCount}`,
                 type: ChannelType.GuildVoice,
                 parent: category.id,
-                permissionOverwrites: [
-                    {
-                        id: guild.roles.everyone,
-                        deny: [PermissionFlagsBits.Connect],
-                    },
-                ],
+                permissionOverwrites: [{ id: guild.roles.everyone, deny: [PermissionFlagsBits.Connect] }],
             });
 
-            // Save settings to Database
+            const voiceChannel = await guild.channels.create({
+                name: `Voice: ${voiceCount}`,
+                type: ChannelType.GuildVoice,
+                parent: category.id,
+                permissionOverwrites: [{ id: guild.roles.everyone, deny: [PermissionFlagsBits.Connect] }],
+            });
+
             await ServerStats.create({
                 guildId: guild.id,
                 categoryId: category.id,
                 memberChannelId: memberChannel.id,
-                botChannelId: botChannel.id
+                totalChannelId: totalChannel.id,
+                voiceChannelId: voiceChannel.id
             });
 
             return interaction.editReply({ content: 'Successfully set up server statistics channels.' });

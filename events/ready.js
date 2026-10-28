@@ -6,7 +6,6 @@ module.exports = {
     async execute(client) {
         console.log(`Logged in as ${client.user.tag}`);
 
-        // Server Stats Auto-Updater (Every 10 minutes)
         setInterval(async () => {
             try {
                 const allStats = await ServerStats.find();
@@ -15,25 +14,30 @@ module.exports = {
                     const guild = client.guilds.cache.get(stats.guildId);
                     if (!guild) continue;
 
-                    // Fetch all members to get fresh count
                     await guild.members.fetch();
 
-                    const totalMembers = guild.memberCount;
-                    const botCount = guild.members.cache.filter(m => m.user.bot).size;
+                    const humanCount = guild.members.cache.filter(m => !m.user.bot).size;
+                    const totalCount = guild.memberCount;
+                    const voiceCount = guild.members.cache.filter(m => m.voice && m.voice.channel).size;
 
                     const memberChannel = guild.channels.cache.get(stats.memberChannelId);
-                    if (memberChannel && memberChannel.name !== `Members: ${totalMembers}`) {
-                        await memberChannel.setName(`Members: ${totalMembers}`);
+                    if (memberChannel && memberChannel.name !== `Members: ${humanCount}`) {
+                        await memberChannel.setName(`Members: ${humanCount}`);
                     }
 
-                    const botChannel = guild.channels.cache.get(stats.botChannelId);
-                    if (botChannel && botChannel.name !== `Bots: ${botCount}`) {
-                        await botChannel.setName(`Bots: ${botCount}`);
+                    const totalChannel = guild.channels.cache.get(stats.totalChannelId);
+                    if (totalChannel && totalChannel.name !== `Total: ${totalCount}`) {
+                        await totalChannel.setName(`Total: ${totalCount}`);
+                    }
+
+                    const voiceChannel = guild.channels.cache.get(stats.voiceChannelId);
+                    if (voiceChannel && voiceChannel.name !== `Voice: ${voiceCount}`) {
+                        await voiceChannel.setName(`Voice: ${voiceCount}`);
                     }
                 }
             } catch (error) {
                 console.error('Error updating server stats channels:', error);
             }
-        }, 10 * 60 * 1000); // 10 minutes interval
+        }, 10 * 60 * 1000);
     },
 };
