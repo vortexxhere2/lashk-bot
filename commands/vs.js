@@ -28,28 +28,27 @@ module.exports = {
         const oyun = interaction.options.getString('oyun');
 
         const embed = new EmbedBuilder()
-            .setTitle('⚔️ YENİ KLAN MAÇI / VS DUYURUSU!')
+            .setTitle('⚔️ NEW CLAN MATCH / VS ANNOUNCEMENT!')
             .setColor('#e74c3c')
             .setDescription(
-                `Bir klan maçı/VS organize edildi! Katılmak istiyorsan aşağıdaki **Katıl** butonuna basabilirsin.\n\n` +
-                `> 🎯 **Oyun:** \`${oyun}\`\n` +
-                `> 🛡️ **Rakip:** \`${rakip}\`\n` +
-                `> 📅 **Tarih / Saat:** \`${tarih}\`\n` +
-                `> 👤 **Yetkili:** <@${interaction.user.id}>`
+                `A clan match/VS has been organized! If you want to participate, you can click the **Join** button below.\n\n` +
+                `> 🎯 **Game:** \`${oyun}\`\n` +
+                `> 🛡️ **Opponent:** \`${rakip}\`\n` +
+                `> 📅 **Date / Time:** \`${tarih}\`\n` +
+                `> 👤 **Organizer:** <@${interaction.user.id}>`
             )
             .setTimestamp()
-            .setFooter({ text: `${interaction.guild.name} • Maç Katılım Sistemi`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
+            .setFooter({ text: `${interaction.guild.name} • Match Participation System`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('btn_vs_join')
-                .setLabel('⚔️ Katıl (0)')
+                .setLabel('⚔️ Join (0)')
                 .setStyle(ButtonStyle.Success)
         );
 
-        // Duyuruyu komutun çalıştırıldığı kanala gönderir
         await interaction.channel.send({ embeds: [embed], components: [row] });
 
-        await interaction.editReply({ content: '✅ VS duyurusu ve katılım butonu başarıyla oluşturuldu!' });
+        await interaction.editReply({ content: '✅ VS announcement and participation button have been successfully created!' });
     }
 };

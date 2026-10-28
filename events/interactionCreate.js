@@ -17,7 +17,7 @@ module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
         try {
-            // 1. SLASH KOMUTLARINI ÇALIŞTIRMA
+            // 1. SLASH COMMANDS
             if (interaction.isChatInputCommand()) {
                 const command = interaction.client.commands.get(interaction.commandName);
                 if (!command) return;
@@ -26,29 +26,29 @@ module.exports = {
                     await command.execute(interaction);
                 } catch (error) {
                     if (error.code === 10062 || error.code === 40060) return;
-                    console.error('Komut çalıştırma hatası:', error);
+                    console.error('Command execution error:', error);
 
                     if (interaction.replied || interaction.deferred) {
-                        await interaction.followUp({ content: '❌ Komut çalıştırılırken bir hata oluştu!', ephemeral: true }).catch(() => {});
+                        await interaction.followUp({ content: '❌ An error occurred while executing this command!', ephemeral: true }).catch(() => {});
                     } else {
-                        await interaction.reply({ content: '❌ Komut çalıştırılırken bir hata oluştu!', ephemeral: true }).catch(() => {});
+                        await interaction.reply({ content: '❌ An error occurred while executing this command!', ephemeral: true }).catch(() => {});
                     }
                 }
             } 
             
-            // 2. SELECT MENU (KATEGORİ SEÇİMİ)
+            // 2. SELECT MENU (CATEGORY SELECTION)
             else if (interaction.isStringSelectMenu()) {
                 if (interaction.customId === 'ticket_category_select') {
                     const selectedValue = interaction.values[0];
                     const modal = new ModalBuilder()
                         .setCustomId(`modal_ticket_${selectedValue}`)
-                        .setTitle('🎫 Destek Talep Formu');
+                        .setTitle('🎫 Support Request Form');
 
                     const reasonInput = new TextInputBuilder()
                         .setCustomId('ticket_reason')
-                        .setLabel('Talebiniz veya Başvuru Nedeniniz?')
+                        .setLabel('Your Request or Application Reason?')
                         .setStyle(TextInputStyle.Paragraph)
-                        .setPlaceholder('Lütfen detaylı şekilde açıklayınız...')
+                        .setPlaceholder('Please explain in detail...')
                         .setRequired(true);
 
                     const firstActionRow = new ActionRowBuilder().addComponents(reasonInput);
@@ -58,10 +58,10 @@ module.exports = {
                 }
             }
 
-            // 3. MODAL SUBMIT (FORM GÖNDERİMİ - TİCKET & BLACKLİST)
+            // 3. MODAL SUBMIT (TICKET & BLACKLIST)
             else if (interaction.isModalSubmit()) {
                 
-                // A) TİCKET AÇMA MODALI
+                // A) TICKET MODAL
                 if (interaction.customId.startsWith('modal_ticket_')) {
                     await interaction.deferReply({ ephemeral: true });
 
@@ -73,7 +73,7 @@ module.exports = {
                     const channelName = `ticket-${user.username.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
                     const existingChannel = guild.channels.cache.find(c => c.name === channelName);
                     if (existingChannel) {
-                        return interaction.editReply({ content: `❌ Zaten açık bir destek talebiniz var: ${existingChannel}` });
+                        return interaction.editReply({ content: `❌ You already have an open support request: ${existingChannel}` });
                     }
 
                     const ticketChannel = await guild.channels.create({
@@ -87,32 +87,32 @@ module.exports = {
                         ]
                     });
 
-                    let categoryTitle = '💬 Genel Destek';
-                    if (categoryType === 'cat_apply') categoryTitle = '⚔️ Klan Başvurusu';
-                    if (categoryType === 'cat_report') categoryTitle = '🚨 Şikayet / Bildirim';
+                    let categoryTitle = '💬 General Support';
+                    if (categoryType === 'cat_apply') categoryTitle = '⚔️ Clan Application';
+                    if (categoryType === 'cat_report') categoryTitle = '🚨 Report / Feedback';
 
                     const ticketEmbed = new EmbedBuilder()
                         .setTitle(`🎫 ${categoryTitle}`)
                         .setColor('#00a2ff')
-                        .setDescription(`Hoş geldin <@${user.id}>!\nYetkililerimiz en kısa sürede seninle ilgilenecektir.`)
+                        .setDescription(`Welcome <@${user.id}>!\nOur staff will assist you as soon as possible.`)
                         .addFields(
-                            { name: '👤 Kullanıcı', value: `<@${user.id}> (\`${user.id}\`)`, inline: true },
-                            { name: '📂 Kategori', value: `\`${categoryTitle}\``, inline: true },
-                            { name: '📝 Talep Detayı', value: `\`\`\`${reason}\`\`\``, inline: false },
-                            { name: '🛡️ Sahiplenen Yetkili', value: '*Henüz yetkili sahiplenmedi*', inline: false }
+                            { name: '👤 User', value: `<@${user.id}> (\`${user.id}\`)`, inline: true },
+                            { name: '📂 Category', value: `\`${categoryTitle}\``, inline: true },
+                            { name: '📝 Request Details', value: `\`\`\`${reason}\`\`\``, inline: false },
+                            { name: '🛡️ Claimed By', value: '*Not claimed yet*', inline: false }
                         )
                         .setTimestamp();
 
                     const actionRow = new ActionRowBuilder().addComponents(
-                        new ButtonBuilder().setCustomId('btn_ticket_claim').setLabel('🖐️ Sahiplen').setStyle(ButtonStyle.Success),
-                        new ButtonBuilder().setCustomId('btn_ticket_close').setLabel('🔒 Kapat').setStyle(ButtonStyle.Danger)
+                        new ButtonBuilder().setCustomId('btn_ticket_claim').setLabel('🖐️ Claim').setStyle(ButtonStyle.Success),
+                        new ButtonBuilder().setCustomId('btn_ticket_close').setLabel('🔒 Close').setStyle(ButtonStyle.Danger)
                     );
 
                     await ticketChannel.send({ content: `<@${user.id}>`, embeds: [ticketEmbed], components: [actionRow] });
-                    return interaction.editReply({ content: `✅ Destek talebiniz başarıyla oluşturuldu: ${ticketChannel}` });
+                    return interaction.editReply({ content: `✅ Your support request has been successfully created: ${ticketChannel}` });
                 }
 
-                // B) BLACKLİST MODALI
+                // B) BLACKLIST MODAL
                 else if (interaction.customId.startsWith('modal_blacklist_')) {
                     await interaction.deferReply({ ephemeral: true });
 
@@ -128,7 +128,6 @@ module.exports = {
                             await guild.members.ban(targetUserId, { reason: `Blacklist: ${reason}` }).catch(() => {});
                         }
 
-                        // Blacklist Kanalı ID'si: 1556019007205670972
                         const blacklistChannel = guild.channels.cache.get('1556019007205670972');
 
                         const logEmbed = new EmbedBuilder()
@@ -145,19 +144,19 @@ module.exports = {
                             await blacklistChannel.send({ embeds: [logEmbed] });
                         }
 
-                        return interaction.editReply({ content: `✅ <@${targetUserId}> başarıyla kara listeye alındı ve kanala gönderildi!` });
+                        return interaction.editReply({ content: `✅ <@${targetUserId}> has been successfully blacklisted and logged!` });
 
                     } catch (err) {
-                        console.error('Blacklist İşlem Hatası:', err);
-                        return interaction.editReply({ content: '❌ Blacklist uygulanırken bir hata oluştu!' });
+                        console.error('Blacklist Error:', err);
+                        return interaction.editReply({ content: '❌ An error occurred while applying the blacklist!' });
                     }
                 }
             }
 
-            // 4. BUTON TIKLAMALARI
+            // 4. BUTTON INTERACTIONS
             else if (interaction.isButton()) {
                 
-                // PİNG / ROL SEÇİM BUTONLARI
+                // PING / ROLE SELECTION BUTTONS
                 if (interaction.customId.startsWith('ping_')) {
                     if (!interaction.deferred && !interaction.replied) {
                         await interaction.deferReply({ ephemeral: true }).catch(() => {});
@@ -172,10 +171,9 @@ module.exports = {
                     const bonusRole = guild.roles.cache.get(bonusRoleId);
 
                     if (!role || !bonusRole) {
-                        return interaction.editReply({ content: '❌ Ping rolleri veya bonus rol sistemde bulunamadı ya da silinmiş!' });
+                        return interaction.editReply({ content: '❌ Ping roles or bonus role could not be found or have been deleted!' });
                     }
 
-                    // Tüm ping rolleri listesi (Kontrol için)
                     const allPingRoleIds = [
                         '1556017471302139954',
                         '1556017494760620032',
@@ -188,28 +186,24 @@ module.exports = {
                     ];
 
                     if (member.roles.cache.has(roleId)) {
-                        // Rolü üzerindeyken tıkladıysa -> Rolü kaldır
                         await member.roles.remove(role).catch(() => {});
 
-                        // Kullanıcının başka herhangi bir ping rolü kalıp kalmadığını kontrol et
                         const hasOtherPingRole = allPingRoleIds.some(id => id !== roleId && member.roles.cache.has(id));
 
-                        // Başka hiç ping rolü kalmadıysa bonus rolü de kaldır, kaldıysa dokunma
                         if (!hasOtherPingRole) {
                             await member.roles.remove(bonusRole).catch(() => {});
-                            return interaction.editReply({ content: `✅ **${role.name}** rolü kaldırıldı. Başka ping rolünüz kalmadığı için **Bildirim** rolü de üzerinizden alındı!` });
+                            return interaction.editReply({ content: `✅ **${role.name}** role removed. Since you have no other ping roles left, the **Notification** role has also been removed from you!` });
                         } else {
-                            return interaction.editReply({ content: `✅ **${role.name}** rolü üzerinizden alındı! Diğer ping rolleriniz aktif olduğu için Bildirim rolünüz duruyor.` });
+                            return interaction.editReply({ content: `✅ **${role.name}** role has been removed! Your Notification role remains active because you still have other ping roles.` });
                         }
                     } else {
-                        // Rolü yoksa ekle ve bonus rolü de garanti olsun diye ekle
                         await member.roles.add(role).catch(() => {});
                         await member.roles.add(bonusRole).catch(() => {});
-                        return interaction.editReply({ content: `🎉 **${role.name}** ve **Bildirim** rolleri başarıyla eklendi!` });
+                        return interaction.editReply({ content: `🎉 **${role.name}** and **Notification** roles successfully added!` });
                     }
                 }
 
-                // A) ROBLOX DOĞRULAMA BUTONU
+                // A) ROBLOX VERIFICATION BUTTON
                 else if (interaction.customId === 'btn_verify_check') {
                     if (!interaction.deferred && !interaction.replied) {
                         await interaction.deferReply({ ephemeral: true }).catch(() => {});
@@ -220,7 +214,7 @@ module.exports = {
 
                     if (!pendingData) {
                         return interaction.editReply({
-                            content: '# ❌ SÜRESİ DOLMUŞ VEYA GEÇERSİZ İŞLEM\nAktif bir doğrulama kodunuz bulunamadı. Lütfen tekrar `/verify` komutunu çalıştırın.'
+                            content: '# ❌ EXPIRED OR INVALID ACTION\nNo active verification code found. Please run `/verify` again.'
                         });
                     }
 
@@ -273,25 +267,25 @@ module.exports = {
                         }
 
                         return interaction.editReply({
-                            content: `# ✅ TEBRİKLER! HESABINIZ DOĞRULANDI\n` +
-                                     `**Roblox Adınız:** \`${pendingData.robloxUsername}\`\n` +
-                                     `${nicknameUpdated ? '✅ Rumuzunuz güncellendi!\n' : ''}` +
-                                     `${roleAdded ? '✅ Verified rolü verildi!\n' : ''}` +
-                                     `${roleRemoved ? '✅ Unverified rolü alındı!' : ''}`
+                            content: `# ✅ CONGRATULATIONS! YOUR ACCOUNT IS VERIFIED\n` +
+                                     `**Roblox Username:** \`${pendingData.robloxUsername}\`\n` +
+                                     `${nicknameUpdated ? '✅ Nickname updated!\n' : ''}` +
+                                     `${roleAdded ? '✅ Verified role given!\n' : ''}` +
+                                     `${roleRemoved ? '✅ Unverified role removed!' : ''}`
                         });
                     } else {
                         return interaction.editReply({
-                            content: '# ❌ KOD BİYOGRAFİDE BULUNAMADI\nBiyografinizde `' + pendingData.code + '` kodu tespit edilemedi.'
+                            content: '# ❌ CODE NOT FOUND IN BIO\nThe code `' + pendingData.code + '` could not be found in your bio.'
                         });
                     }
                 }
 
-                // B) KLAN MAÇI / VS KATILMA BUTONU
+                // B) CLAN MATCH / VS JOIN BUTTON
                 else if (interaction.customId === 'btn_vs_join') {
                     const message = interaction.message;
                     const oldRow = message.components[0];
                     
-                    let currentLabel = oldRow.components[0].data?.label || oldRow.components[0].label || '⚔️ Katıl (0)';
+                    let currentLabel = oldRow.components[0].data?.label || oldRow.components[0].label || '⚔️ Join (0)';
                     let match = currentLabel.match(/\d+/);
                     let count = match ? parseInt(match[0]) : 0;
 
@@ -300,41 +294,41 @@ module.exports = {
                     const newRow = new ActionRowBuilder().addComponents(
                         new ButtonBuilder()
                             .setCustomId('btn_vs_join')
-                            .setLabel(`⚔️ Katıl (${count})`)
+                            .setLabel(`⚔️ Join (${count})`)
                             .setStyle(ButtonStyle.Success)
                     );
 
                     await interaction.update({ components: [newRow] });
-                    return interaction.followUp({ content: '⚔️ Klan maçına başarıyla katıldın!', ephemeral: true });
+                    return interaction.followUp({ content: '⚔️ You have successfully joined the clan match!', ephemeral: true });
                 }
 
-                // C) TİCKET SAHİPLENME (CLAIM)
+                // C) TICKET CLAIM
                 else if (interaction.customId === 'btn_ticket_claim') {
                     const embed = interaction.message.embeds[0];
-                    if (!embed) return interaction.reply({ content: '❌ Embed bulunamadı!', ephemeral: true });
+                    if (!embed) return interaction.reply({ content: '❌ Embed not found!', ephemeral: true });
 
                     const updatedEmbed = EmbedBuilder.from(embed);
-                    updatedEmbed.spliceFields(3, 1, { name: '🛡️ Sahiplenen Yetkili', value: `<@${interaction.user.id}>`, inline: false });
+                    updatedEmbed.spliceFields(3, 1, { name: '🛡️ Claimed By', value: `<@${interaction.user.id}>`, inline: false });
 
                     const newRow = new ActionRowBuilder().addComponents(
-                        new ButtonBuilder().setCustomId('btn_ticket_claimed').setLabel(`🛡️ Sahiplendi: ${interaction.user.username}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
-                        new ButtonBuilder().setCustomId('btn_ticket_close').setLabel('🔒 Kapat').setStyle(ButtonStyle.Danger)
+                        new ButtonBuilder().setCustomId('btn_ticket_claimed').setLabel(`🛡️ Claimed: ${interaction.user.username}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
+                        new ButtonBuilder().setCustomId('btn_ticket_close').setLabel('🔒 Close').setStyle(ButtonStyle.Danger)
                     );
 
                     await interaction.update({ embeds: [updatedEmbed], components: [newRow] });
-                    return interaction.followUp({ content: `✅ Bu destek talebi <@${interaction.user.id}> tarafından üstlenildi!`, ephemeral: false });
+                    return interaction.followUp({ content: `✅ This support ticket has been claimed by <@${interaction.user.id}>!`, ephemeral: false });
                 }
 
-                // D) TİCKET KAPATMA VE LOG KANALINA TRANSKRİPT GÖNDERME
+                // D) TICKET CLOSE & TRANSCRIPT
                 else if (interaction.customId === 'btn_ticket_close') {
-                    await interaction.reply({ content: '🔒 Destek talebi kapatılıyor, transkript log kanalına gönderiliyor ve kanal siliniyor...' });
+                    await interaction.reply({ content: '🔒 Closing ticket, sending transcript to log channel, and deleting channel...' });
 
                     try {
                         const messages = await interaction.channel.messages.fetch({ limit: 100 });
                         const sorted = Array.from(messages.values()).reverse();
 
                         let html = `<!DOCTYPE html>
-                        <html lang="tr">
+                        <html lang="en">
                         <head>
                             <meta charset="UTF-8">
                             <title>Transcript - ${interaction.channel.name}</title>
@@ -351,15 +345,15 @@ module.exports = {
                         </head>
                         <body>
                             <div class="header">
-                                <h2>🎫 LASHK - Destek Talebi Transkripti</h2>
-                                <p><strong>Kanal Adı:</strong> #${interaction.channel.name}</p>
-                                <p><strong>Talebi Kapatan:</strong> ${interaction.user.tag}</p>
-                                <p><strong>Tarih:</strong> ${new Date().toLocaleString('tr-TR')}</p>
+                                <h2>🎫 LASHK - Support Ticket Transcript</h2>
+                                <p><strong>Channel Name:</strong> #${interaction.channel.name}</p>
+                                <p><strong>Closed By:</strong> ${interaction.user.tag}</p>
+                                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
                             </div>
                             <div class="chat-log">`;
 
                         for (const msg of sorted) {
-                            const time = new Date(msg.createdTimestamp).toLocaleString('tr-TR');
+                            const time = new Date(msg.createdTimestamp).toLocaleString();
                             const avatar = msg.author.displayAvatarURL({ extension: 'png', size: 128 });
                             html += `
                                 <div class="message">
@@ -369,7 +363,7 @@ module.exports = {
                                             <span class="username">${msg.author.tag}</span>
                                             <span class="timestamp">${time}</span>
                                         </div>
-                                        <div class="text">${msg.content || '[İçerik Yok / Embed veya Dosya]'}</div>
+                                        <div class="text">${msg.content || '[No Content / Embed or File]'}</div>
                                     </div>
                                 </div>`;
                         }
@@ -384,11 +378,11 @@ module.exports = {
 
                         if (logChannel) {
                             const logEmbed = new EmbedBuilder()
-                                .setTitle('🔒 Destek Talebi Kapatıldı ve Arşivlendi')
+                                .setTitle('🔒 Support Ticket Closed and Archived')
                                 .setColor('#e74c3c')
                                 .addFields(
-                                    { name: '📂 Kapatılan Kanal', value: `\`#${interaction.channel.name}\``, inline: true },
-                                    { name: '👤 Kapatan Yetkili', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true }
+                                    { name: '📂 Closed Channel', value: `\`#${interaction.channel.name}\``, inline: true },
+                                    { name: '👤 Closed By', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true }
                                 )
                                 .setTimestamp();
 
@@ -396,7 +390,7 @@ module.exports = {
                         }
 
                     } catch (transcriptErr) {
-                        console.error('Transcript Log Hatası:', transcriptErr);
+                        console.error('Transcript Log Error:', transcriptErr);
                     }
 
                     setTimeout(async () => {
@@ -406,7 +400,7 @@ module.exports = {
             }
 
         } catch (error) {
-            console.error('InteractionCreate Genel Hata:', error);
+            console.error('InteractionCreate General Error:', error);
         }
     }
 };

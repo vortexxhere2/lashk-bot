@@ -5,20 +5,20 @@ async function generateAllyEmbed(guild) {
     const allies = await Ally.find({ guildId: guild.id });
 
     const allyEmbed = new EmbedBuilder()
-        .setTitle(`LASHK | Müttefik Sunucular`)
+        .setTitle(`LASHK | Ally Servers`)
         .setColor('#2b2d31')
         .setThumbnail(guild.iconURL({ dynamic: true }))
         .setTimestamp();
 
     if (allies.length === 0) {
-        allyEmbed.setDescription('*Henüz eklenmiş bir müttefik bulunmuyor.*');
+        allyEmbed.setDescription('*No allies added yet.*');
         return allyEmbed;
     }
 
     allies.forEach((ally, index) => {
         allyEmbed.addFields({
             name: `${index + 1}. ${ally.serverName}`,
-            value: `**Kurucu:** ${ally.owner}\n**Davet Linki:** [${ally.serverName}](${ally.link})`,
+            value: `**Owner:** ${ally.owner}\n**Invite Link:** [${ally.serverName}](${ally.link})`,
             inline: false
         });
     });
@@ -42,7 +42,7 @@ async function updateAllyListMessage(guild) {
                 await message.edit({ embeds: [embed] });
                 return;
             } catch (err) {
-                // Mesaj silindiyse yenisini gönderir
+                // Send a new message if the old one was deleted
             }
         }
 
@@ -50,7 +50,7 @@ async function updateAllyListMessage(guild) {
         config.messageId = newMessage.id;
         await config.save();
     } catch (error) {
-        console.error('Ally listesi güncellenirken hata oluştu:', error);
+        console.error('Error updating ally list:', error);
     }
 }
 

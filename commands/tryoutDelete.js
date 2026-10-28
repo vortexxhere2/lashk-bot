@@ -34,7 +34,6 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            // Etkileşimin durumunu kontrol ederek güvenli şekilde defer et
             if (!interaction.deferred && !interaction.replied) {
                 await interaction.deferReply().catch(() => {});
             }
@@ -45,14 +44,12 @@ module.exports = {
             const existingTryout = await Tryout.findOne({ userId: targetUser.id });
             if (!existingTryout) {
                 return interaction.editReply({ 
-                    content: `❌ **${targetUser.username}** adlı kullanıcıya ait kayıtlı bir tryout sonucu bulunamadı.` 
+                    content: `❌ No registered tryout result found for **${targetUser.username}**.` 
                 });
             }
 
-            // 1. Veritabanından kaydı sil
             await Tryout.deleteOne({ userId: targetUser.id });
 
-            // 2. Kullanıcı sunucudaysa tryout rollerini üzerinden al
             if (targetMember) {
                 const allStageIds = Object.values(stageRoleMap);
                 const allLevelIds = Object.values(levelRoleMap);
@@ -68,18 +65,18 @@ module.exports = {
             }
 
             return interaction.editReply({
-                content: `✅ **${targetUser.username}** adlı kullanıcının tryout kaydı veritabanından silindi ve ilgili rolleri üzerinden alındı.`
+                content: `✅ Tryout record for **${targetUser.username}** has been deleted from the database and associated roles have been removed.`
             });
 
         } catch (error) {
-            console.error('Tryout Delete Hatası:', error);
-            if (error.code === 10062) return; // Zaman aşımı hatalarını yut
+            console.error('Tryout Delete Error:', error);
+            if (error.code === 10062) return;
 
             try {
                 if (interaction.replied || interaction.deferred) {
-                    await interaction.editReply({ content: '❌ Silme işlemi sırasında bir hata oluştu.' }).catch(() => {});
+                    await interaction.editReply({ content: '❌ An error occurred during the deletion process.' }).catch(() => {});
                 } else {
-                    await interaction.reply({ content: '❌ Silme işlemi sırasında bir hata oluştu.', ephemeral: true }).catch(() => {});
+                    await interaction.reply({ content: '❌ An error occurred during the deletion process.', ephemeral: true }).catch(() => {});
                 }
             } catch (err) {}
         }

@@ -17,13 +17,12 @@ module.exports = {
             const tryouts = await Tryout.find().limit(10);
 
             if (!tryouts || tryouts.length === 0) {
-                return interaction.editReply({ content: '❌ Henüz kayıtlı bir tryout sonucu bulunmuyor.' });
+                return interaction.editReply({ content: '❌ No tryout results recorded yet.' });
             }
 
-            // İstekleri paralel olarak çeken optimizasyonlu haritalama
             const embedPromises = tryouts.map(async (t, i) => {
                 const verified = await VerifiedUser.findOne({ userId: t.userId });
-                const robloxUsername = verified ? verified.robloxUsername : 'Bilinmiyor';
+                const robloxUsername = verified ? verified.robloxUsername : 'Unknown';
                 const robloxId = verified ? verified.robloxId : null;
                 
                 let avatarUrl = 'https://www.roblox.com';
@@ -36,9 +35,7 @@ module.exports = {
                         if (avatarRes.data && avatarRes.data.data && avatarRes.data.data.length > 0) {
                             avatarUrl = avatarRes.data.data[0].imageUrl;
                         }
-                    } catch (err) {
-                        // Avatar çekilemezse varsayılan görsel kalır
-                    }
+                    } catch (err) {}
                 }
 
                 const rank = i + 1;
@@ -64,14 +61,14 @@ module.exports = {
             });
 
         } catch (error) {
-            console.error('Leaderboard Hatası:', error);
+            console.error('Leaderboard Error:', error);
             if (error.code === 10062) return;
 
             try {
                 if (interaction.replied || interaction.deferred) {
-                    await interaction.editReply({ content: '❌ Sıralama yüklenirken bir hata oluştu.' }).catch(() => {});
+                    await interaction.editReply({ content: '❌ An error occurred while loading the leaderboard.' }).catch(() => {});
                 } else {
-                    await interaction.reply({ content: '❌ Sıralama yüklenirken bir hata oluştu.', ephemeral: true }).catch(() => {});
+                    await interaction.reply({ content: '❌ An error occurred while loading the leaderboard.', ephemeral: true }).catch(() => {});
                 }
             } catch (err) {}
         }

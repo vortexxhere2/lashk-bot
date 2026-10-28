@@ -3,7 +3,7 @@ const path = require('path');
 
 const filePath = path.join(__dirname, '../allies.json');
 
-// Dosyayı oku
+// Read file
 function loadData() {
     if (!fs.existsSync(filePath)) {
         fs.writeFileSync(filePath, JSON.stringify({ config: {}, allies: {} }, null, 2));
@@ -12,7 +12,7 @@ function loadData() {
     return JSON.parse(data);
 }
 
-// Dosyaya kaydet
+// Save to file
 function saveData(data) {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }

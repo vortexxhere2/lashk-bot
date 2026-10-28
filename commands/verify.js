@@ -28,7 +28,7 @@ module.exports = {
         const isAlreadyVerified = await VerifiedUser.findOne({ userId: discordUserId });
         if (isAlreadyVerified) {
             return interaction.editReply({
-                content: `# ❌ ZATEN DOĞRULANMIŞ HESAP\nHesabınız zaten **${isAlreadyVerified.robloxUsername}** olarak doğrulanmış!`
+                content: `# ❌ ALREADY VERIFIED ACCOUNT\nYour account is already verified as **${isAlreadyVerified.robloxUsername}**!`
             });
         }
 
@@ -40,7 +40,7 @@ module.exports = {
 
             if (!userSearchRes.data.data || userSearchRes.data.data.length === 0) {
                 return interaction.editReply({
-                    content: `# ❌ KULLANICI BULUNAMADI\n**${robloxUsername}** adında bir Roblox hesabı bulunamadı!`
+                    content: `# ❌ USER NOT FOUND\nNo Roblox account named **${robloxUsername}** was found!`
                 });
             }
 
@@ -48,7 +48,7 @@ module.exports = {
             const robloxId = robloxUser.id;
             const actualRobloxName = robloxUser.name;
 
-            const safeWords = ['elma', 'top', 'mavi', 'kedi', 'masa', 'kalem', 'agac', 'deniz', 'yildiz', 'kitap', 'oyun', 'robot'];
+            const safeWords = ['apple', 'ball', 'blue', 'cat', 'desk', 'pen', 'tree', 'sea', 'star', 'book', 'game', 'robot'];
             const word1 = safeWords[Math.floor(Math.random() * safeWords.length)];
             const word2 = safeWords[Math.floor(Math.random() * safeWords.length)];
             const randomNum = Math.floor(Math.random() * 900) + 100;
@@ -61,34 +61,34 @@ module.exports = {
             );
 
             const embed = new EmbedBuilder()
-                .setTitle('🎮 ROBLOX HESAP DOĞRULAMA')
+                .setTitle('🎮 ROBLOX ACCOUNT VERIFICATION')
                 .setColor('#00a2ff')
                 .setDescription(
-                    `# 📌 DOĞRULAMA ADIMLARI\n\n` +
-                    `### 1️⃣ Profilinize Gidin:\n` +
-                    `🔗 **[Roblox Profilini Açmak İçin Tıklayın](https://www.roblox.com/users/${robloxId}/profile)**\n\n` +
-                    `### 2️⃣ Kodu Biyografinize Yapıştırın:\n` +
-                    `Roblox **About (Hakkımda)** kısmına aşağıdaki kelime kodunu ekleyin:\n\n` +
+                    `# 📌 VERIFICATION STEPS\n\n` +
+                    `### 1️⃣ Go to Your Profile:\n` +
+                    `🔗 **[Click Here to Open Roblox Profile](https://www.roblox.com/users/${robloxId}/profile)**\n\n` +
+                    `### 2️⃣ Paste the Code into Your Bio:\n` +
+                    `Add the word code below to your Roblox **About** section:\n\n` +
                     `# \`\`\`${randomCode}\`\`\`\n` +
-                    `### 3️⃣ Butona Basın:\n` +
-                    `Kodu kaydedip aşağıdaki **"Doğrula"** butonuna tıklayın.`
+                    `### 3️⃣ Click the Button:\n` +
+                    `Save the code and click the **"Verify"** button below.`
                 )
-                .setFooter({ text: '⏰ Doğrulama kodu 10 dakika geçerlidir.' });
+                .setFooter({ text: '⏰ The verification code is valid for 10 minutes.' });
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('btn_verify_check')
-                    .setLabel('✅ DOĞRULA')
+                    .setLabel('✅ VERIFY')
                     .setStyle(ButtonStyle.Success)
             );
 
             return interaction.editReply({ embeds: [embed], components: [row] });
 
         } catch (error) {
-            console.error('Verify Hatası:', error);
+            console.error('Verify Error:', error);
             if (error.code === 10062 || error.code === 40060) return;
             return interaction.editReply({
-                content: '# ❌ HATA\nRoblox API ile iletişim kurulurken bir sorun oluştu.'
+                content: '# ❌ ERROR\nAn issue occurred while communicating with the Roblox API.'
             });
         }
     }

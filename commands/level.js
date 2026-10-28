@@ -24,20 +24,19 @@ module.exports = {
         const xp = userLevel ? userLevel.xp : 0;
         const neededXp = (level + 1) * 150;
 
-        // Görsel İlerleme Çubuğu Hesaplama
         const percentage = Math.min(Math.max(xp / neededXp, 0), 1);
         const progressBlocks = Math.round(percentage * 10);
         const emptyBlocks = 10 - progressBlocks;
         const progressBar = '🟩'.repeat(progressBlocks) + '⬛'.repeat(emptyBlocks);
 
         const embed = new EmbedBuilder()
-            .setColor('#5865F2')
-            .setAuthor({ name: `${targetUser.username} - Seviye Kartı`, iconURL: targetUser.displayAvatarURL({ dynamic: true }) })
+            .setColor(0x5865F2)
+            .setAuthor({ name: `${targetUser.username} - Level Card`, iconURL: targetUser.displayAvatarURL({ dynamic: true }) })
             .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 512 }))
             .setDescription(
-                `> 🌟 **Seviye:** \`${level}\`\n` +
-                `> ✨ **XP Durumu:** \`${xp} / ${neededXp} XP\`\n\n` +
-                `**İlerleme Çubuğu:**\n${progressBar} (%${Math.floor(percentage * 100)})`
+                `> 🌟 **Level:** \`${level}\`\n` +
+                `> ✨ **XP Status:** \`${xp} / ${neededXp} XP\`\n\n` +
+                `**Progress Bar:**\n${progressBar} (%${Math.floor(percentage * 100)})`
             )
             .setTimestamp()
             .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) });

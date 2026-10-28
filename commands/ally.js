@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { Ally } = require('../models/Ally'); // { Ally } şeklinde süslü parantez içinde olmalı
+const { Ally } = require('../models/Ally');
 const { generateAllyEmbed, updateAllyListMessage } = require('../utils/allyEmbed');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('ekle')
-                .setDescription('Yeni bir müttefik ekler.')
+                .setDescription('Yeni bir ally ekler.')
                 .addUserOption(option => 
                     option.setName('owner')
                         .setDescription('Sunucu sahibini (Owner) etiketleyin.')
@@ -30,7 +30,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sil')
-                .setDescription('Bir müttefiki listeden siler.')
+                .setDescription('Bir ally listeden siler.')
                 .addStringOption(option => 
                     option.setName('isim')
                         .setDescription('Silinecek sunucunun ismi.')
@@ -59,7 +59,7 @@ module.exports = {
                 await updateAllyListMessage(interaction.guild);
 
                 return interaction.editReply({ 
-                    content: `✅ **${serverName}** müttefik listesine başarıyla eklendi!` 
+                    content: `✅ **${serverName}** has been successfully added to the ally list!` 
                 });
             }
 
@@ -72,14 +72,14 @@ module.exports = {
 
                 if (!deleted) {
                     return interaction.editReply({ 
-                        content: `❌ **${serverName}** isimli müttefik bulunamadı.` 
+                        content: `❌ Ally named **${serverName}** was not found.` 
                     });
                 }
 
                 await updateAllyListMessage(interaction.guild);
 
                 return interaction.editReply({ 
-                    content: `🗑️ **${serverName}** müttefik listesinden silindi.` 
+                    content: `🗑️ **${serverName}** has been removed from the ally list.` 
                 });
             }
 
@@ -88,9 +88,9 @@ module.exports = {
                 return interaction.editReply({ embeds: [embed] });
             }
         } catch (error) {
-            console.error('Ally komut hatası:', error);
+            console.error('Ally command error:', error);
             return interaction.editReply({
-                content: '❌ İşlem sırasında bir hata oluştu!'
+                content: '❌ An error occurred during the process!'
             });
         }
     }

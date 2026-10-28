@@ -27,7 +27,6 @@ module.exports = {
         try {
             await guild.members.unban(targetUser.id, { reason: `Unblacklist: ${reason}` }).catch(() => {});
 
-            // Unblacklist Kanalı ID'si: 1563842674111545415
             const unblacklistChannel = guild.channels.cache.get('1563842674111545415');
 
             const logEmbed = new EmbedBuilder()
@@ -44,11 +43,11 @@ module.exports = {
                 await unblacklistChannel.send({ embeds: [logEmbed] });
             }
 
-            return interaction.editReply({ content: `✅ ${targetUser} başarıyla unblacklist edildi ve kanala gönderildi!` });
+            return interaction.editReply({ content: `✅ ${targetUser} has been successfully unblacklisted and logged!` });
 
         } catch (err) {
-            console.error('Unblacklist İşlem Hatası:', err);
-            return interaction.editReply({ content: '❌ Unblacklist uygulanırken bir hata oluştu!' });
+            console.error('Unblacklist Error:', err);
+            return interaction.editReply({ content: '❌ An error occurred while applying unblacklist!' });
         }
     }
 };

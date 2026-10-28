@@ -12,33 +12,32 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('🎙️ LASHK | ÖZEL SES ODASI MERKEZİ')
+            .setTitle('🎙️ LASHK | PRIVATE VOICE CENTER')
             .setColor('#5865f2')
             .setDescription(
-                `Kendi özel ses odanızı oluşturmak ve yönetmek çok kolay!\n\n` +
-                `> 🔊 **Oda Oluşturmak İçin:** Ses kanallarındaki **Oda Oluştur** kanalına giriş yapmanız yeterlidir. Bot size özel oda açacaktır.\n\n` +
-                `*Aşağıdaki butonları kendi odanızdayken hızlı işlem yapmak için kullanabilirsiniz.*`
+                `Creating and managing your own private voice channel is very easy!\n\n` +
+                `> 🔊 **To Create a Room:** Simply join the **Create Room** channel in the voice channels category. The bot will create a private room for you.\n\n` +
+                `*You can use the buttons below for quick actions while you are in your own room.*`
             )
             .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
             .setTimestamp()
-            .setFooter({ text: `${interaction.guild.name} • Özel Ses Sistemi`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
+            .setFooter({ text: `${interaction.guild.name} • Private Voice System`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
 
         const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('tvoice_lock').setLabel('🔒 Kilitle').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('tvoice_unlock').setLabel('🔓 Kilidi Aç').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId('tvoice_hide').setLabel('👁️ Gizle').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('tvoice_unhide').setLabel('👁️ Göster').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('tvoice_lock').setLabel('🔒 Lock').setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('tvoice_unlock').setLabel('🔓 Unlock').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('tvoice_hide').setLabel('👁️ Hide').setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('tvoice_unhide').setLabel('👁️ Unhide').setStyle(ButtonStyle.Success),
             new ButtonBuilder().setCustomId('tvoice_limit').setLabel('👥 Limit').setStyle(ButtonStyle.Primary)
         );
 
-        // Doğrudan belirttiğin How-to kanalına (1558116547644624967) paneli gönderir
         const howToChannel = interaction.guild.channels.cache.get('1558116547644624967');
         if (howToChannel) {
             await howToChannel.send({ embeds: [embed], components: [row] });
-            await interaction.editReply({ content: '✅ Özel ses yönetim paneli başarıyla <#1558116547644624967> kanalına kuruldu!' });
+            await interaction.editReply({ content: '✅ Private voice management panel successfully installed in <#1558116547644624967>!' });
         } else {
             await interaction.channel.send({ embeds: [embed], components: [row] });
-            await interaction.editReply({ content: '✅ Panel bu kanala kuruldu (How-to kanalı önbellekte bulunamadı).' });
+            await interaction.editReply({ content: '✅ Panel installed in this channel (How-to channel not found in cache).' });
         }
     }
 };

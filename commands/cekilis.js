@@ -28,19 +28,19 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setColor(0xFEE75C)
-            .setTitle(`🎉 ÇEKİLİŞ: ${prize}`)
-            .setDescription(`Katılmak için aşağıdaki **Katıl** butonuna tıklayın!\n\n⏱️ **Bitiş:** <t:${~~(endTime / 1000)}:R>\n👑 **Kazanan Sayısı:** ${winnerCount}`)
+            .setTitle(`🎉 GIVEAWAY: ${prize}`)
+            .setDescription(`Click the **Join** button below to participate!\n\n⏱️ **Ends:** <t:${~~(endTime / 1000)}:R>\n👑 **Winner Count:** ${winnerCount}`)
             .setTimestamp();
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('giveaway_join')
-                .setLabel('Katıl (0)')
+                .setLabel('Join (0)')
                 .setEmoji('🎉')
                 .setStyle(ButtonStyle.Primary)
         );
 
-        await interaction.reply({ content: '🎉 Çekiliş başarıyla başlatıldı!', ephemeral: true });
+        await interaction.reply({ content: '🎉 Giveaway successfully started!', ephemeral: true });
         const giveawayMsg = await interaction.channel.send({ embeds: [embed], components: [row] });
 
         const collector = giveawayMsg.createMessageComponentCollector({
@@ -51,22 +51,22 @@ module.exports = {
         collector.on('collect', async i => {
             if (i.customId === 'giveaway_join') {
                 if (participants.has(i.user.id)) {
-                    return i.reply({ content: 'Çekilişe zaten katıldınız!', ephemeral: true });
+                    return i.reply({ content: 'You have already joined the giveaway!', ephemeral: true });
                 }
                 participants.add(i.user.id);
 
                 const updatedRow = new ActionRowBuilder().addComponents(
-                    ButtonBuilder.from(i.message.components[0].components[0]).setLabel(`Katıl (${participants.size})`)
+                    ButtonBuilder.from(i.message.components[0].components[0]).setLabel(`Join (${participants.size})`)
                 );
                 await i.message.edit({ components: [updatedRow] });
-                await i.reply({ content: 'Çekilişe başarıyla katıldınız! Bol şans 🍀', ephemeral: true });
+                await i.reply({ content: 'Successfully joined the giveaway! Good luck 🍀', ephemeral: true });
             }
         });
 
         collector.on('end', async () => {
             const participantArray = Array.from(participants);
             if (participantArray.length === 0) {
-                return interaction.channel.send(`🎉 **${prize}** çekilişi sona erdi, ancak yeterli katılım olmadı.`);
+                return interaction.channel.send(`🎉 The giveaway for **${prize}** has ended, but there were not enough participants.`);
             }
 
             const winners = [];
@@ -78,10 +78,10 @@ module.exports = {
             const winnerMentions = winners.map(w => `<@${w}>`).join(', ');
             const endEmbed = EmbedBuilder.from(giveawayMsg.embeds[0])
                 .setColor(0x57F287)
-                .setDescription(`🎉 **Çekiliş Sona Erdi!**\n🎁 **Ödül:** ${prize}\n👑 **Kazananlar:** ${winnerMentions}`);
+                .setDescription(`🎉 **Giveaway Ended!**\n🎁 **Prize:** ${prize}\n👑 **Winners:** ${winnerMentions}`);
 
             await giveawayMsg.edit({ embeds: [endEmbed], components: [] });
-            await interaction.channel.send(`🎉 Tebrikler ${winnerMentions}! **${prize}** çekilişini kazandınız!`);
+            await interaction.channel.send(`🎉 Congratulations ${winnerMentions}! You won the **${prize}** giveaway!`);
         });
     }
 };

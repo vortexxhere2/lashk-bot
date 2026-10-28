@@ -12,38 +12,38 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('🎫 LASHK | DESTEK & BAŞVURU MERKEZİ')
+            .setTitle('🎫 LASHK | SUPPORT & APPLICATION CENTER')
             .setColor('#2b2d31')
             .setDescription(
-                `Aşağıdaki açılır menüden ihtiyacınıza uygun kategori seçerek anında destek talebi oluşturabilirsiniz.\n\n` +
-                `> 💬 **Genel Destek:** Sorularınız ve genel yardım talepleri.\n` +
-                `> ⚔️ **Klan Başvurusu:** Klanımıza katılım şartları ve başvurular.\n` +
-                `> 🚨 **Şikayet & Bildirim:** Kural ihlali veya yetkili şikayetleri.\n\n` +
-                `*Tüm talepleriniz yetkili ekibimiz tarafından gizlilikle incelenir.*`
+                `You can create a support ticket instantly by selecting the appropriate category from the menu below.\n\n` +
+                `> 💬 **General Support:** Your questions and general help requests.\n` +
+                `> ⚔️ **Clan Application:** Clan join requirements and applications.\n` +
+                `> 🚨 **Report / Feedback:** Rule violations or staff complaints.\n\n` +
+                `*All your requests are reviewed confidentially by our staff team.*`
             )
             .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
             .setTimestamp()
-            .setFooter({ text: `${interaction.guild.name} • Destek Sistemi`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
+            .setFooter({ text: `${interaction.guild.name} • Support System`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('ticket_category_select')
-            .setPlaceholder('📂 Bir destek kategorisi seçin...')
+            .setPlaceholder('📂 Select a support category...')
             .addOptions([
                 {
-                    label: 'Genel Destek',
-                    description: 'Genel sorular ve yardım talepleri.',
+                    label: 'General Support',
+                    description: 'General questions and help requests.',
                     value: 'cat_support',
                     emoji: '💬'
                 },
                 {
-                    label: 'Klan Başvurusu',
-                    description: 'LASHK klanına katılım başvurusu.',
+                    label: 'Clan Application',
+                    description: 'Application to join LASHK clan.',
                     value: 'cat_apply',
                     emoji: '⚔️'
                 },
                 {
-                    label: 'Şikayet / Bildirim',
-                    description: 'Kural ihlali ve şikayet bildirimleri.',
+                    label: 'Report / Feedback',
+                    description: 'Rule violations and report submissions.',
                     value: 'cat_report',
                     emoji: '🚨'
                 }
@@ -52,6 +52,6 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await interaction.channel.send({ embeds: [embed], components: [row] });
-        await interaction.editReply({ content: '✅ Dünya standartlarında gelişmiş Ticket paneli kuruldu!' });
+        await interaction.editReply({ content: '✅ Advanced support ticket panel has been successfully installed!' });
     }
 };

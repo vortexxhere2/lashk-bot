@@ -71,7 +71,7 @@ module.exports = {
         const targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
 
         if (!targetMember) {
-            return interaction.editReply({ content: '❌ Kullanıcı sunucuda bulunamadı!' });
+            return interaction.editReply({ content: '❌ User not found in the server!' });
         }
 
         const selectedStage = interaction.options.getString('stage');
@@ -105,13 +105,13 @@ module.exports = {
             if (newLevelRole) { await targetMember.roles.add(newLevelRole).catch(() => {}); givenNames.push(newLevelRole.name); }
             if (newStatusRole) { await targetMember.roles.add(newStatusRole).catch(() => {}); givenNames.push(newStatusRole.name); }
 
-            const resultMessage = `${targetUser} Tryout sonucun: **${selectedStage} ${selectedLevel} ${selectedStatus}**\n✅ Verilen Roller: **${givenNames.join(', ')}** başarıyla tanımlandı ve sisteme kaydedildi!`;
+            const resultMessage = `${targetUser} Tryout result: **${selectedStage} ${selectedLevel} ${selectedStatus}**\n✅ Assigned Roles: **${givenNames.join(', ')}** have been successfully assigned and saved to the system!`;
 
             return interaction.editReply({ content: resultMessage });
 
         } catch (error) {
-            console.error('Tryout Results Hatası:', error);
-            return interaction.editReply({ content: '❌ Rol verilirken veya veritabanına yazılırken bir hata oluştu.' });
+            console.error('Tryout Results Error:', error);
+            return interaction.editReply({ content: '❌ An error occurred while assigning roles or writing to the database.' });
         }
     }
 };

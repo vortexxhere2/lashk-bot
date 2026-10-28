@@ -1,10 +1,8 @@
 const Level = require('../models/Level');
 const { Groq } = require('groq-sdk');
 
-// Groq istemcisini .env içerisindeki anahtar ile başlatıyoruz
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Belirttiğin Seviye Rol Haritası
 const levelRoles = {
     5: '1556017805759877251',
     10: '1556017815478210741',
@@ -18,30 +16,24 @@ const levelRoles = {
     50: '1556017895618781345'
 };
 
-// Spam engellemek için cooldown (60 saniye)
 const cooldowns = new Set();
-
-// Kullanıcıların sohbet geçmişini (hafızasını) tutmak için Map
 const userHistories = new Map();
 
 module.exports = {
     name: 'messageCreate',
     async execute(message) {
-        // Botların kendi mesajlarına veya diğer botlara yanıt vermesini engelle
         if (message.author.bot || !message.guild) return;
 
-        // @everyone veya @here atıldığında bot hiç tepki vermesin
         if (message.content.includes('@everyone') || message.content.includes('@here')) {
             return;
         }
 
-        // --- LEVEL SİSTEMİ & XP KODU ---
         const userId = message.author.id;
         const guildId = message.guild.id;
         const cooldownKey = `${guildId}-${userId}`;
 
         if (!cooldowns.has(cooldownKey)) {
-            const xpToAdd = Math.floor(Math.random() * 11) + 15; // 15 ile 25 arası rastgele XP
+            const xpToAdd = Math.floor(Math.random() * 11) + 15;
             try {
                 let userLevel = await Level.findOne({ userId, guildId });
                 if (!userLevel) {
@@ -56,14 +48,12 @@ module.exports = {
                     userLevel.xp = 0;
                     await userLevel.save();
 
-                    // Seviye atlandığında mesaj gönderilecek kanal (`1556018597849997352`)
                     const levelChannelId = '1556018597849997352';
                     const levelChannel = message.guild.channels.cache.get(levelChannelId);
                     if (levelChannel) {
-                        levelChannel.send(`🎉 Tebrikler <@${userId}>, **${userLevel.level}. Seviye**'ye ulaştın!`);
+                        levelChannel.send(`Tebrikler <@${userId}>, ${userLevel.level}. Seviye'ye ulaştın.`);
                     }
 
-                    // Otomatik Rol Verme
                     if (levelRoles[userLevel.level]) {
                         const roleId = levelRoles[userLevel.level];
                         const role = message.guild.roles.cache.get(roleId);
@@ -79,11 +69,10 @@ module.exports = {
                 cooldowns.add(cooldownKey);
                 setTimeout(() => cooldowns.delete(cooldownKey), 60000);
             } catch (error) {
-                console.error('Level Sistem Hatası:', error);
+                console.error('Level System Error:', error);
             }
         }
 
-        // --- GROQ YAPAY ZEKA ETİKET YANITI (HAFIZALI / GEÇMİŞLİ) ---
         if (message.mentions.has(message.client.user)) {
             const cleanContent = message.content
                 .replace(`<@!${message.client.user.id}>`, '')
@@ -91,29 +80,25 @@ module.exports = {
                 .trim();
 
             if (!cleanContent) {
-                return message.reply('Efendim! Beni etiketledin, seni dinliyorum. Nasıl yardımcı olabilirim? 🤖');
+                return message.reply('Efendim. Dinliyorum.');
             }
 
             try {
                 await message.channel.sendTyping();
 
-                const systemInstruction = "Sen LASHK klanının Discord botusun. Adın LASHK Bot. Discord, oyunlar ve klan kültürü hakkında bilgilisin. Samimi, yardımsever, bazen oyuncu dilinden anlayan bir tarzda Türkçe yanıtlar ver.";
+                const systemInstruction = "You are a concise, plain, and straightforward AI assistant. Keep all responses short and directly to the point. Never use any emojis. Do not output unnecessary text or overcomplicate answers. Use the context of the user's recent messages to maintain a natural conversation flow.";
 
-                // Kullanıcının daha önceki sohbet geçmişini al, yoksa boş başlat
                 if (!userHistories.has(userId)) {
                     userHistories.set(userId, []);
                 }
                 const history = userHistories.get(userId);
 
-                // Kullanıcının yeni mesajını hafızaya ekle
                 history.push({ role: "user", content: cleanContent });
 
-                // Hafızanın çok şişmemesi için son 10 mesajı (5 soru-cevap) tut
                 if (history.length > 10) {
                     history.shift();
                 }
 
-                // Groq API'ye sistem talimatı ve geçmiş mesajların tümünü gönder
                 const completion = await groq.chat.completions.create({
                     messages: [
                         { role: "system", content: systemInstruction },
@@ -123,9 +108,8 @@ module.exports = {
                     max_tokens: 500,
                 });
 
-                const replyText = completion.choices[0]?.message?.content || "Şu anda yanıt üretemiyorum, lütfen tekrar dene.";
+                const replyText = completion.choices[0]?.message?.content || "Yanit uretilemedi.";
 
-                // Botun verdiği yanıtı da hafızaya ekle ki bir sonraki mesajda hatarlasın
                 history.push({ role: "assistant", content: replyText });
 
                 if (replyText.length > 2000) {
@@ -135,12 +119,11 @@ module.exports = {
                 return message.reply(replyText);
 
             } catch (error) {
-                console.error('Groq API Hatası:', error);
-                return message.reply('Yapay zeka beynimde bir hata oluştu, şu an yanıt veremiyorum 😔');
+                console.error('Groq API Error:', error);
+                return message.reply('Hata olustu.');
             }
         }
 
-        // --- MEVCUT MESAJ YANITLARI ---
         const content = message.content
             .toLowerCase()
             .replace(/ı/g, 'i')
@@ -151,42 +134,35 @@ module.exports = {
             .replace(/ç/g, 'c')
             .trim();
 
-        // "as" veya "a.s." yazıldığında doğrudan pas geç (yanıt verme)
         if (content === 'as' || content === 'a.s.' || content === 'a.s') {
             return;
         }
 
-        // 1. MERHABA
         const merhabaRegex = /^(mrhb|mrb|mrh|meraba|merhaba|merhabalaar|merhabalar|merheba)$/i;
         if (merhabaRegex.test(content)) {
-            return message.reply(`Merhaba, <@${message.author.id}> Hoşgeldin!`);
+            return message.reply(`Merhaba, <@${message.author.id}> Hosgeldin.`);
         }
 
-        // 2. SELAM
         const selamRegex = /^(slm|selam|selamm|selamlar|slmlar)$/i;
         if (selamRegex.test(content)) {
-            return message.reply(`Selam, Hoşgeldin <@${message.author.id}>`);
+            return message.reply(`Selam, Hosgeldin <@${message.author.id}>`);
         }
 
-        // 3. SELAMÜN ALEYKÜM
         const saRegex = /^(sa|s\.a\.|selamunaleykum|selamun aleykum|selaminaleykum|selamin aleykum|selamun aleykuum|sa cumleten|sa hoke)$/i;
         if (saRegex.test(content)) {
-            return message.reply(`Aleykümselam, Hoşgeldin <@${message.author.id}>`);
+            return message.reply(`Aleykümselam, Hosgeldin <@${message.author.id}>`);
         }
 
-        // 4. İYİ GECELER
         const iyiGecelerRegex = /^(iyi geceler|ii geceler|iyi gceler|iyi gcler|ii gckig|iyi geceler herkese|İyi geceler)$/i;
         if (iyiGecelerRegex.test(content)) {
             return message.reply(`Sanada iyigeceler, <@${message.author.id}>`);
         }
 
-        // 5. GÜNAYDIN
         const gunaydinRegex = /^(gunaydin|gunaydın|gnydn|gn3ii|sabahlariyi|iyi sabahlar)$/i;
         if (gunaydinRegex.test(content)) {
             return message.reply(`Günaydın, <@${message.author.id}>`);
         }
 
-        // 6. TÜNAYDIN
         const tunaydinRegex = /^(tunaydin|tunaydın|tnydn)$/i;
         if (tunaydinRegex.test(content)) {
             return message.reply(`Tünaydın, <@${message.author.id}>`);

@@ -5,11 +5,11 @@ const { updateAllyListMessage } = require('../utils/allyEmbed');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('allysetup')
-        .setDescription('Canlı müttefik (Ally) listesinin yayınlanacağı kanalı ayarlar.')
+        .setDescription('Canlı Ally listesinin yayınlanacağı kanalı ayarlar.')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addChannelOption(option =>
             option.setName('kanal')
-                .setDescription('Müttefik listesinin gönderileceği kanalı seçin.')
+                .setDescription('Ally listesinin gönderileceği kanalı seçin.')
                 .setRequired(true)),
 
     async execute(interaction) {
@@ -28,9 +28,9 @@ module.exports = {
         await config.save();
 
         await interaction.editReply({
-            content: `✅ Müttefik listesi kanalı ${channel} olarak ayarlandı! Liste mesajı gönderiliyor...`
+            content: `✅ Ally list channel has been set to ${channel}! Sending the list message...`
         });
 
         await updateAllyListMessage(interaction.guild);
     }
-};
+}

@@ -72,25 +72,23 @@ module.exports = {
             const targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
 
             if (!targetMember) {
-                return interaction.editReply({ content: '❌ Kullanıcı sunucuda bulunamadı!' });
+                return interaction.editReply({ content: '❌ User not found in the server!' });
             }
 
             const existingTryout = await Tryout.findOne({ userId: targetUser.id });
             if (!existingTryout) {
-                return interaction.editReply({ content: `❌ **${targetUser.username}** adlı kullanıcıya ait kayıtlı bir tryout sonucu bulunamadı. Önce \`/tryout-results\` ile kayıt oluşturmalısınız.` });
+                return interaction.editReply({ content: `❌ No registered tryout result found for **${targetUser.username}**. You must create a record first using \`/tryout-results\`.` });
             }
 
             const selectedStage = interaction.options.getString('stage');
             const selectedLevel = interaction.options.getString('seviye');
             const selectedStatus = interaction.options.getString('durum');
 
-            // Veritabanını güncelle
             await Tryout.findOneAndUpdate(
                 { userId: targetUser.id },
                 { stage: selectedStage, level: selectedLevel, status: selectedStatus }
             );
 
-            // Eski rolleri temizle
             const allStageIds = Object.values(stageRoleMap);
             const allLevelIds = Object.values(levelRoleMap);
             const allStatusIds = Object.values(statusRoleMap);
@@ -102,7 +100,6 @@ module.exports = {
                 await targetMember.roles.remove(rolesToRemove).catch(() => {});
             }
 
-            // Yeni rolleri ekle
             const newStageRole = interaction.guild.roles.cache.get(stageRoleMap[selectedStage]);
             const newLevelRole = interaction.guild.roles.cache.get(levelRoleMap[selectedLevel]);
             const newStatusRole = interaction.guild.roles.cache.get(statusRoleMap[selectedStatus]);
@@ -113,18 +110,18 @@ module.exports = {
             if (newStatusRole) { await targetMember.roles.add(newStatusRole).catch(() => {}); givenNames.push(newStatusRole.name); }
 
             return interaction.editReply({
-                content: `✅ **${targetUser.username}** adlı kullanıcının tryout sonucu güncellendi!\n📌 Yeni Sonuç: **${selectedStage} ${selectedLevel} ${selectedStatus}**\n🏷️ Güncellenen Roller: **${givenNames.join(', ')}**`
+                content: `✅ Tryout result updated for **${targetUser.username}**!\n📌 New Result: **${selectedStage} ${selectedLevel} ${selectedStatus}**\n🏷️ Updated Roles: **${givenNames.join(', ')}**`
             });
 
         } catch (error) {
-            console.error('Tryout Edit Hatası:', error);
+            console.error('Tryout Edit Error:', error);
             if (error.code === 10062) return;
 
             try {
                 if (interaction.replied || interaction.deferred) {
-                    await interaction.editReply({ content: '❌ Düzenleme sırasında bir hata oluştu.' }).catch(() => {});
+                    await interaction.editReply({ content: '❌ An error occurred during the update.' }).catch(() => {});
                 } else {
-                    await interaction.reply({ content: '❌ Düzenleme sırasında bir hata oluştu.', ephemeral: true }).catch(() => {});
+                    await interaction.reply({ content: '❌ An error occurred during the update.', ephemeral: true }).catch(() => {});
                 }
             } catch (err) {}
         }

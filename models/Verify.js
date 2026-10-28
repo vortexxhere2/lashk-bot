@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Geçici doğrulama kodlarını tutan şema (10 dakika sonra otomatik silinir)
+// Schema holding temporary verification codes (automatically deleted after 10 minutes)
 const pendingVerificationSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true }, // Discord User ID
     robloxUsername: { type: String, required: true },
@@ -9,7 +9,7 @@ const pendingVerificationSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now, expires: 600 } 
 });
 
-// Doğrulanmış kullanıcıları tutan şema
+// Schema holding verified users
 const verifiedUserSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true },
     robloxUsername: { type: String, required: true },

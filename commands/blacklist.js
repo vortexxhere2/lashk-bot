@@ -15,13 +15,13 @@ module.exports = {
 
         const modal = new ModalBuilder()
             .setCustomId(`modal_blacklist_${targetUser.id}`)
-            .setTitle('🚫 Blacklist / Kara Liste İşlemi');
+            .setTitle('🚫 Blacklist Procedure');
 
         const reasonInput = new TextInputBuilder()
             .setCustomId('blacklist_reason')
-            .setLabel('Blacklist Nedeni Nedir?')
+            .setLabel('What is the reason for blacklist?')
             .setStyle(TextInputStyle.Paragraph)
-            .setPlaceholder('Lütfen detaylı bir gerekçe yazın...')
+            .setPlaceholder('Please provide a detailed reason...')
             .setRequired(true);
 
         const firstActionRow = new ActionRowBuilder().addComponents(reasonInput);
