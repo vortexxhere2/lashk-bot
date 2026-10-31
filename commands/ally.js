@@ -2,6 +2,11 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { Ally } = require('../models/Ally');
 const { generateAllyEmbed, updateAllyListMessage } = require('../utils/allyEmbed');
 
+// Regex özel karakterlerini kaçış karakteriyle güvenli hale getiren fonksiyon
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ally')
@@ -65,9 +70,11 @@ module.exports = {
 
             if (subcommand === 'sil') {
                 const serverName = interaction.options.getString('isim');
+                const escapedName = escapeRegExp(serverName);
+                
                 const deleted = await Ally.findOneAndDelete({ 
                     guildId: interaction.guild.id, 
-                    serverName: { $regex: new RegExp(`^${serverName}$`, 'i') } 
+                    serverName: { $regex: new RegExp(`^${escapedName}$`, 'i') } 
                 });
 
                 if (!deleted) {
